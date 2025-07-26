@@ -12,6 +12,7 @@ namespace FNCosmeticUnlockerUI
         private Button launchBackendButton;
         private Button stopBackendButton;
         private Button startPieButton;
+        private Button fixProxyButton;
         private static TextBox logTextBox;
         
         private Process backendProcess;
@@ -125,7 +126,14 @@ namespace FNCosmeticUnlockerUI
             // Form properties
             this.Text = "Fortnite Cosmetic Unlocker";
             this.Width = 400;
-            this.Height = 350;
+            this.Height = 370;
+            this.MaximizeBox = false;
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            if (!Fiddler.Setup())
+            {
+                AppendLog("Fiddler setup failed");
+                return;
+            }
             // Launch Backend Button
             launchBackendButton = new Button();
             launchBackendButton.Text = "Launch Backend";
@@ -142,6 +150,7 @@ namespace FNCosmeticUnlockerUI
             stopBackendButton.Top = 20;
             stopBackendButton.Left = 200;
             stopBackendButton.Click += StopBackend_Click;
+            stopBackendButton.Enabled = false;
             this.Controls.Add(stopBackendButton);
 
             // Start PIE Button
@@ -152,14 +161,22 @@ namespace FNCosmeticUnlockerUI
             startPieButton.Left = 30;
             startPieButton.Click += StartPie_Click;
             this.Controls.Add(startPieButton);
-
+            
+            fixProxyButton = new Button();
+            fixProxyButton.Text = "FIX INTERNET CONNECTION";
+            fixProxyButton.Width = 320;
+            fixProxyButton.Top = 100;
+            fixProxyButton.Left = 30;
+            fixProxyButton.Click += ProxyDisabler.DisableSystemProxy;
+            this.Controls.Add(fixProxyButton);
+            
             // Log Output Field
             logTextBox = new TextBox();
             logTextBox.Multiline = true;
-            logTextBox.ScrollBars = ScrollBars.Vertical;
+            logTextBox.ScrollBars = ScrollBars.None;
             logTextBox.Width = 320;
             logTextBox.Height = 180;
-            logTextBox.Top = 110;
+            logTextBox.Top = 140;
             logTextBox.Left = 30;
             logTextBox.ReadOnly = true;
             this.Controls.Add(logTextBox);
@@ -171,6 +188,8 @@ namespace FNCosmeticUnlockerUI
         }        
         private void LaunchBackend_Click(object sender, EventArgs e)
         {
+            launchBackendButton.Enabled = false;
+            stopBackendButton.Enabled = true;
             FiddlerApplication.Log.OnLogString += OnFiddlerLog;
 
             
@@ -211,6 +230,8 @@ namespace FNCosmeticUnlockerUI
         
         private void StopBackend_Click(object sender, EventArgs e)
         {
+            stopBackendButton.Enabled = false;
+            launchBackendButton.Enabled = true;
             AppendLog("Stopping Backend");
             FiddlerApplication.Shutdown();
             KillFortniteProcess();
@@ -239,7 +260,7 @@ namespace FNCosmeticUnlockerUI
             }
         }
 
-        private static void AppendLog(string message)
+        public static void AppendLog(string message)
         {
             if (message != null)
             {
